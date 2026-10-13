@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "compresso"
+version = "0.1.0"
+description = "Batch image & video compressor for Linux and Windows — folder-aware, GPU-accelerated video, no-regression guard."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Compresso contributors" }]
+keywords = ["compression", "jpeg", "webp", "heic", "h264", "av1", "ffmpeg", "batch"]
+classifiers = [
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Graphics :: Graphics Conversion",
+    "Topic :: Multimedia :: Video :: Conversion",
+]
+dependencies = [
+    "Pillow>=10",
+    "pillow-heif>=0.13",
+]
+
+[project.scripts]
+compresso = "compresso.cli:main"
+
+[project.optional-dependencies]
+ui = ["pywebview>=5"]
+
+[project.urls]
+Homepage = "https://github.com/CHANGE_ME/compresso"
+
+[tool.setuptools.packages.find]
+include = ["compresso*"]
+
+[tool.setuptools.package-data]
+compresso = ["static/*"]

@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compresso</title>
+<style>
+  :root{
+    --bg:#0e1013; --panel:#161a20; --panel2:#1c2129; --border:#2a313c;
+    --fg:#e8ecf1; --mut:#8b98a8; --acc:#4cc2ff; --ok:#3fd68f; --warn:#f0b429; --err:#ff6b6b;
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+    font:15px/1.5 system-ui,"Segoe UI",Roboto,sans-serif;}
+  .wrap{max-width:1020px;margin:0 auto;padding:28px 20px 60px}
+  header{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+  .logo{width:42px;height:42px;border-radius:11px;flex:none;
+    background:linear-gradient(135deg,#4cc2ff,#7c5cff);
+    display:grid;place-items:center;font-weight:800;font-size:19px;color:#fff}
+  h1{font-size:22px;margin:0;font-weight:700}
+  .sub{color:var(--mut);font-size:13px;margin:0}
+  .env{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 22px}
+  .pill{font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid var(--border);
+    background:var(--panel);color:var(--mut)}
+  .pill b{color:var(--fg);font-weight:600}
+  .pill.ok b{color:var(--ok)} .pill.bad b{color:var(--err)}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px;margin-bottom:16px}
+  label{display:block;font-size:12px;font-weight:600;color:var(--mut);
+    text-transform:uppercase;letter-spacing:.05em;margin:0 0 6px}
+  input[type=text],input[type=number],select{width:100%;background:var(--panel2);border:1px solid var(--border);
+    color:var(--fg);border-radius:8px;padding:10px 12px;font:inherit}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc)}
+  textarea{width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--fg);
+    border-radius:8px;padding:10px 12px;font:14px/1.5 ui-monospace,Consolas,monospace;min-height:74px;resize:vertical}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:14px}
+  .check{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--fg);text-transform:none;letter-spacing:0;font-weight:400;margin-top:26px}
+  .check input{accent-color:var(--acc);width:16px;height:16px}
+  .row{display:flex;gap:12px;align-items:center;margin-top:18px;flex-wrap:wrap}
+  button{background:var(--acc);color:#04121d;border:0;border-radius:9px;padding:11px 22px;
+    font:inherit;font-weight:700;cursor:pointer}
+  button:hover{filter:brightness(1.1)} button:disabled{opacity:.45;cursor:default}
+  button.ghost{background:transparent;color:var(--mut);border:1px solid var(--border);font-weight:500}
+  button.warn{background:var(--warn);color:#241a02}
+  .hint{color:var(--mut);font-size:12.5px;margin-top:8px}
+  details{margin-top:14px;border:1px solid var(--border);border-radius:9px;background:var(--panel2)}
+  summary{cursor:pointer;padding:10px 14px;font-weight:600;color:var(--mut);font-size:13px}
+  details[open] summary{border-bottom:1px solid var(--border)}
+  .adv{padding:4px 14px 14px}
+  .bar{height:8px;background:var(--panel2);border-radius:99px;overflow:hidden;margin:10px 0 4px}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#4cc2ff,#3fd68f);transition:width .3s}
+  .stats{display:flex;gap:18px;color:var(--mut);font-size:13px;flex-wrap:wrap}
+  .stats b{color:var(--fg)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:12px}
+  th{color:var(--mut);text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;
+    padding:6px 8px;border-bottom:1px solid var(--border)}
+  td{padding:7px 8px;border-bottom:1px solid #20262f;vertical-align:top}
+  td.fn{max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .st{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px}
+  .st.ok{background:#123b2a;color:var(--ok)} .st.skipped{background:#3a3116;color:var(--warn)}
+  .st.error{background:#3d1d1d;color:var(--err)} .st.running{background:#173042;color:var(--acc)}
+  .pct{font-variant-numeric:tabular-nums;font-weight:600}
+  .pct.neg{color:var(--warn)} .pct.pos{color:var(--ok)}
+  .note{color:var(--mut);font-size:12px}
+  .exts{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .ext{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px}
+  .ext b{color:var(--ok)}
+  footer{color:var(--mut);font-size:12px;margin-top:26px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">C</div>
+    <div>
+      <h1>Compresso</h1>
+      <p class="sub">Batch image &amp; video compression — originals never touched</p>
+    </div>
+  </header>
+
+  <div class="env" id="env"><span class="pill">checking environment…</span></div>
+
+  <div class="card">
+    <label for="paths">Folders or files to compress (one per line)</label>
+    <textarea id="paths" placeholder="/home/me/Pictures&#10;D:\Videos\holiday&#10;/home/me/photo.jpg"></textarea>
+    <p class="hint">Subfolders are included automatically. Files already compressed by Compresso are skipped.</p>
+
+    <div class="grid">
+      <div><label for="out">Output folder (optional)</label>
+        <input type="text" id="out" placeholder="auto: &lt;folder&gt;-sqz"></div>
+      <div><label for="preset">Preset</label>
+        <select id="preset"><option value="" selected>None (manual)</option>
+          <option value="email">Email — smallest</option>
+          <option value="web">Web — balanced</option>
+          <option value="archive">Archive — best</option></select></div>
+      <div><label for="q">Quality</label>
+        <select id="q"><option value="low">Low (smallest)</option>
+          <option value="medium" selected>Medium</option><option value="high">High</option></select></div>
+      <div><label for="ifmt">Image format</label>
+        <select id="ifmt"><option value="auto" selected>Keep / auto</option><option value="jpeg">JPEG</option>
+          <option value="png">PNG</option><option value="webp">WebP</option><option value="avif">AVIF</option></select></div>
+      <div><label for="vcodec">Video codec</label>
+        <select id="vcodec"><option value="h264" selected>H.264 MP4</option>
+          <option value="hevc">H.265/HEVC MP4</option><option value="av1">AV1 MP4</option></select></div>
+      <div><label for="maxedge">Max edge px (optional)</label>
+        <input type="text" id="maxedge" placeholder="e.g. 1920"></div>
+    </div>
+
+    <div class="row">
+      <label class="check"><input type="checkbox" id="images" checked> Images</label>
+      <label class="check"><input type="checkbox" id="videos" checked> Videos</label>
+      <label class="check"><input type="checkbox" id="noaudio"> Drop audio</label>
+      <label class="check"><input type="checkbox" id="force"> Force (ignore skip rules)</label>
+    </div>
+
+    <details>
+      <summary>Advanced options</summary>
+      <div class="adv">
+        <div class="grid">
+          <div><label for="bitrate">Video bitrate (optional)</label>
+            <input type="text" id="bitrate" placeholder="e.g. 2M"></div>
+          <div><label for="abitrate">Audio bitrate (optional)</label>
+            <input type="text" id="abitrate" placeholder="e.g. 128k"></div>
+          <div><label for="trim">Trim video (optional)</label>
+            <input type="text" id="trim" placeholder="5s or 1:02-1:30"></div>
+          <div><label for="pngmode">PNG mode</label>
+            <select id="pngmode"><option value="auto" selected>Auto</option>
+              <option value="palette">Palette (256-colour)</option><option value="rgb">RGB</option></select></div>
+          <div><label for="jobs">Parallel jobs</label>
+            <input type="number" id="jobs" value="1" min="1" max="16"></div>
+          <div><label for="minsize">Min size (skip smaller)</label>
+            <input type="text" id="minsize" placeholder="e.g. 10k"></div>
+          <div><label for="maxsize">Max size (skip larger)</label>
+            <input type="text" id="maxsize" placeholder="e.g. 500m"></div>
+          <div><label for="since">Only newer than</label>
+            <input type="text" id="since" placeholder="7d, 24h or 2026-01-01"></div>
+          <div><label for="maxdepth">Max folder depth</label>
+            <input type="number" id="maxdepth" placeholder="unlimited" min="0"></div>
+          <div><label for="include">Include glob</label>
+            <input type="text" id="include" placeholder="*.jpg"></div>
+          <div><label for="exclude">Exclude glob</label>
+            <input type="text" id="exclude" placeholder="thumbnails/*"></div>
+          <div><label for="marker">Output marker</label>
+            <input type="text" id="marker" value=".sqz"></div>
+        </div>
+        <div class="row">
+          <label class="check"><input type="checkbox" id="resume"> Resume (skip done files on re-run)</label>
+          <label class="check"><input type="checkbox" id="dedupe"> Skip duplicate content</label>
+          <label class="check"><input type="checkbox" id="verify"> Verify outputs decode</label>
+          <label class="check"><input type="checkbox" id="keeptime"> Keep modification times</label>
+          <label class="check"><input type="checkbox" id="keepexif"> Keep EXIF metadata</label>
+          <label class="check"><input type="checkbox" id="hidden"> Include hidden files</label>
+          <label class="check"><input type="checkbox" id="symlinks"> Follow symlinks</label>
+        </div>
+      </div>
+    </details>
+
+    <div class="row">
+      <button id="go">Compress</button>
+      <button class="warn" id="cancel" hidden>Stop</button>
+      <button class="ghost" id="quit">Quit server</button>
+      <span class="hint" id="statusline"></span>
+    </div>
+  </div>
+
+  <div class="card" id="results" hidden>
+    <div class="bar"><i id="barfill"></i></div>
+    <div class="stats" id="stats"></div>
+    <div class="exts" id="exts"></div>
+    <table id="tbl" hidden>
+      <thead><tr><th>File</th><th>Status</th><th>Size</th><th>Saved</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <footer>Compresso <span id="ver"></span> · MIT · Linux &amp; Windows · <a href="https://github.com/CHANGE_ME/compresso" style="color:var(--mut)">GitHub</a></footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const human=n=>{if(n==null)return"";const u=["B","KB","MB","GB","TB"];let i=0;while(Math.abs(n)>=1024&&i<u.length-1){n/=1024;i++}return n.toFixed(1)+" "+u[i]};
+
+fetch("/api/env").then(r=>r.json()).then(e=>{
+  $("ver").textContent="v"+e.version;
+  const el=$("env"); el.innerHTML="";
+  const add=(cls,html)=>{const s=document.createElement("span");s.className="pill "+cls;s.innerHTML=html;el.appendChild(s)};
+  add(e.ffmpeg?"ok":"bad", e.ffmpeg?`<b>ffmpeg</b> ${e.ffmpeg.replace("ffmpeg version ","").split(" ")[0]}`:"<b>ffmpeg missing</b> — video disabled");
+  add(e.heif?"ok":"bad", e.heif?"<b>HEIC</b> supported":"<b>HEIC</b> unavailable");
+  if(e.hw&&e.hw.length) add("ok",`<b>GPU encoders</b> ${[...new Set(e.hw.map(x=>x.split("_")[1].toUpperCase()))].join(" ")}`);
+  else if(e.sw&&e.sw.length) add("",`<b>encoders</b> software only`);
+});
+
+let poll=null, jobId=null;
+$("go").onclick=async()=>{
+  const paths=$("paths").value.split("\n").map(s=>s.trim()).filter(Boolean);
+  if(!paths.length){$("statusline").textContent="add at least one folder or file";return}
+  const v=id=>$(id).value.trim();
+  const opts={paths,quality:$("q").value,image_format:$("ifmt").value,video_codec:$("vcodec").value,
+    images:$("images").checked,videos:$("videos").checked,no_audio:$("noaudio").checked,
+    force:$("force").checked,output:v("out")||undefined,
+    preset:v("preset")||undefined,
+    max_edge:v("maxedge")?parseInt(v("maxedge"),10):undefined,
+    bitrate:v("bitrate")||undefined,audio_bitrate:v("abitrate")||undefined,trim:v("trim")||undefined,
+    png_mode:$("pngmode").value,jobs:parseInt($("jobs").value,10)||1,
+    min_size:v("minsize")||undefined,max_size:v("maxsize")||undefined,
+    since:v("since")||undefined,max_depth:v("maxdepth")!==""?parseInt(v("maxdepth"),10):undefined,
+    include:v("include")?[v("include")]:undefined,exclude:v("exclude")?[v("exclude")]:undefined,
+    marker:v("marker")||".sqz",
+    resume:$("resume").checked,dedupe:$("dedupe").checked,verify:$("verify").checked,
+    keep_mtime:$("keeptime").checked,strip_exif:!$("keepexif").checked,
+    include_hidden:$("hidden").checked,follow_symlinks:$("symlinks").checked};
+  $("go").disabled=true; $("statusline").textContent="starting…";
+  const r=await fetch("/api/run",{method:"POST",body:JSON.stringify(opts)});
+  const j=await r.json();
+  if(j.error){$("statusline").textContent=j.error;$("go").disabled=false;return}
+  jobId=j.id; $("results").hidden=false; $("cancel").hidden=false; $("statusline").textContent="";
+  clearInterval(poll); poll=setInterval(()=>tick(j.id),600); tick(j.id);
+};
+$("cancel").onclick=()=>{if(jobId)fetch("/api/cancel?id="+jobId)};
+
+async function tick(id){
+  const j=await (await fetch("/api/progress?id="+id)).json();
+  if(j.state==="not_found")return;
+  const pct=j.total?Math.round(j.done/j.total*100):0;
+  $("barfill").style.width=(j.state==="done"?100:pct)+"%";
+  const saved=j.total_in-j.total_out;
+  $("stats").innerHTML=
+    `<span><b>${j.done}</b> / ${j.total}</span>`+
+    `<span><b style="color:var(--ok)">${j.compressed}</b> compressed</span>`+
+    `<span><b style="color:var(--warn)">${j.skipped}</b> skipped</span>`+
+    (j.failed?`<span><b style="color:var(--err)">${j.failed}</b> failed</span>`:"")+
+    (j.compressed?`<span><b>${human(Math.max(saved,0))}</b> saved of ${human(j.total_in)}</span>`:"")+
+    (j.out_root&&j.compressed?`<span>→ ${j.out_root}</span>`:"")+
+    (j.error?`<span style="color:var(--err)">${j.error}</span>`:"");
+  const bx=j.by_ext||{};
+  $("exts").innerHTML=Object.entries(bx).filter(([,v])=>v.in>0).map(([k,v])=>
+    `<span class="ext">${k} ×${v.n} <b>−${human(Math.max(v.in-v.out,0))}</b></span>`).join("");
+  if(j.entries.length){
+    $("tbl").hidden=false;
+    $("tbody").innerHTML=j.entries.slice().reverse().map(e=>{
+      const name=e.file.split(/[\\/]/).pop();
+      const st=`<span class="st ${e.status}">${e.status}</span>`;
+      let size="",pctc="";
+      if(e.in_size!=null){size=`${human(e.in_size)} → ${human(e.out_size)}`;
+        pctc=`<span class="pct ${e.pct>=0?'pos':'neg'}">${e.pct>=0?'+':''}${e.pct}%</span>`+(e.encoder?`<div class="note">${e.encoder}</div>`:"");}
+      const note=e.note?`<div class="note">${e.note}</div>`:"";
+      return `<tr><td class="fn" title="${e.file}">${name}</td><td>${st}${note}</td><td>${size}</td><td>${pctc}</td></tr>`;
+    }).join("");
+  }
+  if(j.state==="done"||j.state==="error"||j.state==="cancelled"){
+    clearInterval(poll); $("go").disabled=false; $("cancel").hidden=true;
+    $("statusline").textContent=j.state==="done"?"done":j.state;
+  }
+}
+
+$("quit").onclick=async()=>{await fetch("/api/quit",{method:"POST"});document.body.innerHTML='<p style="padding:40px;color:#8b98a8">Server stopped — you can close this window.</p>'};
+</script>
+</body>
+</html>
