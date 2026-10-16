@@ -1,5 +1,7 @@
 # Compresso
 
+[![CI](https://github.com/Kiwi172/compresso/actions/workflows/ci.yml/badge.svg)](https://github.com/Kiwi172/compresso/actions/workflows/ci.yml)
+
 Batch image & video compression for **Linux and Windows**.
 
 Drop a whole folder (or single files), choose a quality level, and it compresses
